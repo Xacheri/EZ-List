@@ -7,7 +7,7 @@ import ListPanelItem from './ListPanelItem.vue'
     <div id="panel">
         <div class="list"><img class="me-3" src="..\assets\plus.svg">Create a new List</div>
         <hr>
-        <ListPanelItem v-for="item in testList.list" :list="item"></ListPanelItem>
+        <ListPanelItem v-for="item in list.list" :list="item"></ListPanelItem>
     </div>
 </template>
 
@@ -15,47 +15,12 @@ import ListPanelItem from './ListPanelItem.vue'
 export default {
     data() {
         return {
-            testList: {
-                listName: "Test",
-                list: [
-                    {
-                        aisle: "DEFAULT_NAME",
-                        list: [
-                            {
-                                food: "Test Food 1",
-                                quantity: 1,
-                                price: 0.99
-                            },
-                            {
-                                food: "Test Food 2",
-                                quantity: 3,
-                                price: 7.99
-                            }
-                        ]
-                    },
-                    {
-                        aisle: "DEFAULT_NAME_2",
-                        list: [
-                            {
-                                food: "Test Food 3",
-                                quantity: 90,
-                                price: 0.99
-                            },
-                            {
-                                food: "Test Food 4",
-                                quantity: 100,
-                                price: 7.99
-                            }
-                        ]
-                    }
-                ]
-            }
         }
     },
     props: {
         list: {
-            type: Array,
-            default: []
+            type: Object,
+            default: {}
         }
     }
 }
