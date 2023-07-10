@@ -29,6 +29,7 @@ body {
 header {
   line-height: 1.5;
   max-height: 100vh;
+  width: 100%;
 }
 
 .logo {
@@ -37,7 +38,6 @@ header {
 }
 
 nav {
-  width: 100%;
   font-size: 12px;
   text-align: center;
   margin: 1rem;

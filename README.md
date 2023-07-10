@@ -1,6 +1,5 @@
-# Easy Shopper
-
-This template should help get you started developing with Vue 3 in Vite.
+# EZ List
+This is a webapp designed to help organize your grocery list for faster grocery shopping. You can create and store lists that are sorted based on your preferred order of aisles.
 
 ## Recommended IDE Setup
 
