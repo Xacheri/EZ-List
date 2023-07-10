@@ -23,6 +23,9 @@ import Footer from './components/Footer.vue'
 </template>
 
 <style>
+body {
+  background-color: #F9F7E9;
+}
 header {
   line-height: 1.5;
   max-height: 100vh;

@@ -6,9 +6,10 @@ import ListPanelItem from './ListPanelItem.vue'
     <h2>Your Lists:</h2>
     <div id="panel">
         <div class="list"><img class="me-3" src="..\assets\plus.svg">Create a new List</div>
-        <hr>
-        <ListPanelItem v-for="item in list.list" :list="item"></ListPanelItem>
+        <ListPanelItem @listSelected="emitList" v-for="item in lists" :list="item"></ListPanelItem>
     </div>
+
+
 </template>
 
 <script>
@@ -18,11 +19,18 @@ export default {
         }
     },
     props: {
-        list: {
-            type: Object,
-            default: {}
+        lists: {
+            type: Array,
+            default: [{},{}]
         }
-    }
+    },
+    methods: {
+        emitList(list)
+        {
+            this.$emit('listSelected', list);
+        }
+    },
+    emits: ['listSelected']
 }
 </script>
 
@@ -34,6 +42,7 @@ h2 {
 #panel {
     border-radius: 30px;
     border: 1px solid black;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
 }
 
 .list {

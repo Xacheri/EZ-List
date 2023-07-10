@@ -1,10 +1,7 @@
 <template>
-    <div>
-        <h2>{{ list.aisle }}</h2>
-        <div class="list" v-for="item in list.list">
-            {{ item.quantity }} {{ item.food }} 
-        </div>
-        <hr>
+    <hr class="m-1">
+    <div class="ms-3 mb-1 d-flex justify-content-between align-items-center">
+        <h2 class="h5">{{ list.listName }}</h2><span><img src="src\assets\shopping-cart-outline.svg" alt="" width="30" @click="$emit('listSelected', list)"><img class="m-2" src="src\assets\trash.svg" alt="" width="25"></span>
     </div>
 </template>
 
@@ -19,22 +16,10 @@
             list: {
                 type: Object,
                 default: {
-                    aisle: "DEFAULT_NAME",
-                    list: [
-                                {
-                                    food: "Test Food 1",
-                                    quantity: 1,
-                                    price: 0.99
-                                },
-                                {
-                                    food: "Test Food 2",
-                                    quantity: 3,
-                                    price: 7.99
-                                }
-                            ]
                 }
             }
-        }
+        },
+        emits: ['listSelected']
     }
 </script>
 <style scoped>
@@ -44,5 +29,9 @@
 
     hr {
         border: 1px solid black;
+    }
+
+    img {
+        transform: scaleX(-1);
     }
 </style>
