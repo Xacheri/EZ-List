@@ -19,6 +19,7 @@ class DBConn {
         this.#CONNECTION = null; 
     }
 
+
     // name : connect
     // purpose : establish a connection to the database specified in dotenv
     // params: n/a
@@ -31,12 +32,18 @@ class DBConn {
             database: this.#DB_NAME
         })
 
-        this.#CONNECTION.connect((err) => {
-            if (err) {
-                console.error("Database Connection Error:", err);
-            }
-            console.log('connected to database: '+this.#DB_NAME);
-        });
+        return new Promise((resolve, reject) => {
+            this.#CONNECTION.connect((err) => {
+                if (err) {
+                    console.error("Database Connection Error:", err);
+                    reject(err);
+                }
+                else {
+                    console.log('connected to database: '+this.#DB_NAME);
+                    resolve();   
+                }
+            });  
+        })
     }
 
     // name : disconnect
@@ -50,7 +57,9 @@ class DBConn {
             if (err) {
                 console.error("Database Disconnect Error:", err);
             }
-            console.log('database connection closed');
+            else {
+                console.log('database connection closed');
+            }
         })
     }
 
@@ -62,7 +71,7 @@ class DBConn {
     //         distinct: optional boolean - true = distinct rows
     //         join: optional string - a whole join clause (JOIN keyword and everything)
     //         order: optional string - an ORDERBY sql condition
-    // returns: An array of RowDataPackets from the database
+    // returns: A Promise to an array of RowDataPackets from the database
     select(table, fields, where = null, distinct = false, join = null, order = null) {
         
         var fieldString = this.#arrToCSVString(fields, false);
@@ -72,10 +81,11 @@ class DBConn {
                      ${where != null ? 'WHERE '+where : ''}
                      ${order != null ? "ORDER BY "+order : ""}`;
         
-        this.#CONNECTION.query(query, (err, rows, fields) => {
-            if (err) throw err;
-            return rows;
-        })
+        return new Promise((resolve, reject) => {
+            this.#CONNECTION.query(query, (err, rows) => {
+                err ? reject(err) : resolve(rows);
+            })
+        });
     }
 
     // name : update
@@ -90,7 +100,7 @@ class DBConn {
 
         var strfmt = (str) => typeof(str) == 'string' ? `'${str}'`: str;
         // extract columns and values
-        var setStrings = Object.entries(fvKeyPairs).map((arrayItem, i, array) => { 
+        var setStrings = Object.entries(fvKeyPairs).map((arrayItem) => { 
          return `${arrayItem[0]} = ${strfmt(arrayItem[1])}`
         });
         var set = this.#arrToCSVString(setStrings, false);
@@ -121,13 +131,15 @@ class DBConn {
         
         var query = `INSERT INTO ${table} (${colString}) VALUES (${valString})`;
 
-        this.#CONNECTION.query(query, (err, rows, fields) => {
-            if (err) throw err;
-            return rows;
-        })
+        return new Promise((resolve, reject) => {
+            this.#CONNECTION.query(query, (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            })
+        });
     }
 
-    // name: #arrToCSVString (# = private)
+    // name: #arrToCSVString (#private)
     // purpose: for writing queries, turns an array into a string of comma-separated values
     // params: arr: an array of values
     //         formatstrings: optional - wether to format string values with quotation marks for SQL
