@@ -11,8 +11,9 @@ require('dotenv').config();
 
 // const bodyParser = require("body-parser"); //  body-parser for parsing requests
 
-var LoginModel = require('./models/LoginModel.js');
+// var LoginController = require('./controllers/LoginController.js');
+
 var func = async () => { 
-    console.log(await LoginModel.loginUser('root', 'root') ? LoginModel.login_password : "failed");
+    // test area
 }
 func();
