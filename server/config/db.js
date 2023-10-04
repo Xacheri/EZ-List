@@ -1,8 +1,10 @@
 // import and configure dotenv
-require('dotenv').config();
+// require('dotenv').config();
 // require mysql for db actions
 const mysql = require('mysql');
 
+// name: DBConn
+// purpose: provide access to database query functions (sanitze + run queries)
 class DBConn {
     #DB_NAME; // db name (#private)
     #DB_HOST; // db host (#private) 
@@ -53,13 +55,16 @@ class DBConn {
     disconnect() {
         if (this.#CONNECTION == null ) { return; }
 
-        this.#CONNECTION.end((err) => {
-            if (err) {
-                console.error("Database Disconnect Error:", err);
-            }
-            else {
-                console.log('database connection closed');
-            }
+        return new Promise((resolve, reject) => {
+            this.#CONNECTION.end((err) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    console.log('database connection closed');
+                    resolve();
+                }
+            });
         })
     }
 
@@ -73,13 +78,13 @@ class DBConn {
     //         order: optional string - an ORDERBY sql condition
     // returns: A Promise to an array of RowDataPackets from the database
     select(table, fields, where = null, distinct = false, join = null, order = null) {
-        
+        // .escape() and .escapeId() sanitize input by inserting relevant escape characters
         var fieldString = this.#arrToCSVString(fields, false);
         var query = `SELECT ${distinct ? "DISTINCT" : ""} ${fieldString} 
-                     FROM ${table}
+                     FROM ${this.#CONNECTION.escapeId(table)}
                      ${join != null ? join : ""} 
                      ${where != null ? 'WHERE '+where : ''}
-                     ${order != null ? "ORDER BY "+order : ""}`;
+                     ${order != null ? "ORDER BY "+this.#CONNECTION.escapeId(order) : ""}`;
         
         return new Promise((resolve, reject) => {
             this.#CONNECTION.query(query, (err, rows) => {
@@ -96,6 +101,7 @@ class DBConn {
     // returns: An OkPacket from the database
     update(table, fvKeyPairs, where)
     {
+        // .escape() sanitize input by inserting relevant escape characters
         if (where === null) return this.insert(table, fvKeyPairs);
 
         var strfmt = (str) => typeof(str) == 'string' ? `'${str}'`: str;
@@ -105,7 +111,7 @@ class DBConn {
         });
         var set = this.#arrToCSVString(setStrings, false);
 
-        var query = `UPDATE ${table} SET ${set} WHERE ${where}`;
+        var query = `UPDATE ${table} SET ${set} WHERE ${this.#CONNECTION.escape(where)}`;
 
         this.#CONNECTION.query(query, (err, rows, fields) => {
             if (err) throw err;
@@ -128,7 +134,6 @@ class DBConn {
         var colString = this.#arrToCSVString(cols, false);
         var valString = this.#arrToCSVString(vals);
 
-        
         var query = `INSERT INTO ${table} (${colString}) VALUES (${valString})`;
 
         return new Promise((resolve, reject) => {

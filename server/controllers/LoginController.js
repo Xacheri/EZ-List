@@ -21,15 +21,26 @@ class LoginController {
         try
         {
             var UserPackets = await this.findUserByUsername(username);
-            var verifypassword = this.#verifyPassword;
-            var validlogin = UserPackets.some(async (packet) => await verifypassword(password, packet.login_password));
 
-            if (validlogin)
+            let validLogin = false;
+            let validPacket = null;
+            for(const packet of UserPackets)
             {
-                var validPacket = UserPackets.find(async (packet) => await verifypassword(password, packet.login_password));
+                const validPassword = await this.verifyPassword(password, packet.login_password);
+
+                if(validPassword)
+                {
+                    validLogin = true;
+                    validPacket = packet;
+                }
+            }
+
+            if (validLogin)
+            {
                 this.logins = [LoginModel.ConstructWithRowDP(validPacket)];
             }
-            return validlogin;
+            
+            return validLogin;
         }
         catch (e)
         {
@@ -45,10 +56,10 @@ class LoginController {
     async findUserByUsername(username) {
         try
         {
-            this.#repository.connect();
+            await this.#repository.connect();
             let LoginPackets = await this.#repository.select(this.#table, "*", `login_username='${username}'`);
             this.logins = LoginPackets.map(packet => LoginModel.ConstructWithRowDP(packet));
-            this.#repository.disconnect();
+            await this.#repository.disconnect();
             return this.logins;
         }
         catch(e)
@@ -69,7 +80,7 @@ class LoginController {
                 login_password: password,
                 login_username: username,
             }
-            this.#repository.connect();
+            await this.#repository.connect();
             await this.#repository.insert(this.#table, logininfo);
             this.#repository.disconnect();
             return true;
@@ -85,8 +96,8 @@ class LoginController {
     // purpose: Hashes a password w/ bcrypt
     // params: password, string to hash
     // returns: a promise to a hashed password
-    #hashPassword(password){
-        return new Promise((resolve, reject) =>
+    async #hashPassword(password){
+        return await new Promise((resolve, reject) =>
         {
             bcrypt.hash(password, 12, (err, hash) => {
                 if (err)
@@ -101,15 +112,20 @@ class LoginController {
         });
     }
 
-    // name: #verifyPassword (#private)
+    // name: verifyPassword
     // purpose: checks a password w/ bcrypt
     // params: input, string to check ; hash, hashed string to check against
     // returns: a promise to boolean whether password matched
-    #verifyPassword(input, hashedTarget) {
+    verifyPassword(input, hashedTarget) {
         return new Promise((resolve, reject) => {
             bcrypt.compare(input, hashedTarget, (err, result) => {
-                if (err) {reject(err); }
-                else {resolve(result); }
+                if (err)
+                {
+                    reject(err); 
+                }
+                else {
+                    resolve(result); 
+                }
             })
         })
     }
